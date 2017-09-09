@@ -13,7 +13,7 @@ problem_title = 'California Winter Extreme Rainfall Prediction'
 _prediction_label_names = [0, 1]
 
 Predictions = rw.prediction_types.make_multiclass(label_names=_prediction_label_names)
-workflow = rw.workflows.FeatureExtractorClassifier()
+workflow = rw.workflows.GridFeatureExtractorClassifier()
 score_types = [
     rw.score_types.ROCAUC(name="auc"),
     rw.score_types.BrierScore(name="brier_score")
@@ -28,23 +28,29 @@ def get_cv(X, y):
         groups[i: i + ens_size] = g
         i += ens_size
     cv = LeaveOneGroupOut()
-    return cv.split(X, y, groups)
+    X_cv = np.zeros((y.shape[0], 2))
+    return cv.split(X_cv, y, groups)
 
 def _read_data(path, f_prefix):
-    nc_files = sorted(glob(join(path, f_prefix + "_*.nc")))      
+    data_vars = ["TS", "PSL", "TMQ", "U_500", "V_500", "Z3_500"]
     X_coll = []
-    for nc_file in nc_files:
-        x_coll.append(xr.open_dataset(nc_file, decode_times=False))
-        x_coll[-1].load()
-    X_ds = xr.merge(x_coll)
-    y = pd.read_csv(join(path, f_prefix + "_precip_90.csv"))
+    for data_var in data_vars:
+        nc_file = join(path, "data", f_prefix + "_{0}.nc".format(data_var))
+        print(nc_file)
+        ds = xr.open_dataset(nc_file, decode_times=False)
+        ds.load()
+        X_coll.append(ds[data_var].stack(enstime=("ens", "time")).transpose("enstime", "lat", "lon"))
+        ds.close()
+    X_ds = xr.merge(X_coll)
+    print(X_ds)
+    y = pd.read_csv(join(path, "data", f_prefix + "_precip_90.csv"))
     y_array = np.concatenate([y[c] for c in y.columns])
     return X_ds, y_array
 
 
-def get_train_data(path='.'):
+def get_train_data(path='./data'):
     return _read_data(path, 'train')
 
 
-def get_test_data(path='.'):
+def get_test_data(path='./data'):
     return _read_data(path, 'test')
