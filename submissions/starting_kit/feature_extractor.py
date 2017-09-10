@@ -13,11 +13,13 @@ class FeatureExtractor():
     def fit(self, X_ds, y):
         for var in self.variables:
             if var not in self.means.keys():
-                self.means[var] = X_ds[var].mean(axis=0)
-                self.sds[var] = X_ds[var].std(axis=0)
+                self.means[var] = X_ds[var].mean(axis=0).values
+                self.sds[var] = X_ds[var].std(axis=0).values
+                self.sds[var][self.sds[var] == 0] = 1
+                print(var, self.means[var].mean(), self.sds[var].mean())
             var_norm = (X_ds[var] - self.means[var]) / self.sds[var]
             var_flat = var_norm.stack(latlon=("lat", "lon")).values
-            print(var_flat)
+            var_flat[np.isnan(var_flat)] = 0
             self.pca[var] = PCA(n_components=self.num_comps)
             self.pca[var].fit(var_flat)
 
@@ -29,6 +31,7 @@ class FeatureExtractor():
         for var in self.variables:
             var_norm = (X_ds[var] - self.means[var]) / self.sds[var]
             var_flat = var_norm.stack(latlon=("lat", "lon")).values
+            var_flat[np.isnan(var_flat)] = 0
             X[:, c:c+self.num_comps] = self.pca[var].transform(var_flat)
             c += self.num_comps
         return X

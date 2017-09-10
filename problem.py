@@ -43,7 +43,7 @@ def _read_data(path, f_prefix):
         ds.close()
     X_ds = xr.merge(X_coll)
     print(X_ds)
-    y = pd.read_csv(join(path, "data", f_prefix + "_precip_90.csv"))
+    y = pd.read_csv(join(path, "data", f_prefix + "_precip_90.csv"), index_col="Year")
     y_array = np.concatenate([y[c] for c in y.columns])
     return X_ds, y_array
 
