@@ -16,7 +16,6 @@ class FeatureExtractor():
                 self.means[var] = X_ds[var].mean(axis=0).values
                 self.sds[var] = X_ds[var].std(axis=0).values
                 self.sds[var][self.sds[var] == 0] = 1
-                print(var, self.means[var].mean(), self.sds[var].mean())
             var_norm = (X_ds[var] - self.means[var]) / self.sds[var]
             var_flat = var_norm.stack(latlon=("lat", "lon")).values
             var_flat[np.isnan(var_flat)] = 0

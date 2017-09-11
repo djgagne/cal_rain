@@ -42,7 +42,6 @@ def _read_data(path, f_prefix):
         X_coll.append(ds[data_var].stack(enstime=("ens", "time")).transpose("enstime", "lat", "lon"))
         ds.close()
     X_ds = xr.merge(X_coll)
-    print(X_ds)
     y = pd.read_csv(join(path, "data", f_prefix + "_precip_90.csv"), index_col="Year")
     y_array = np.concatenate([y[c] for c in y.columns])
     return X_ds, y_array
