@@ -15,8 +15,11 @@ _prediction_label_names = [0, 1]
 Predictions = rw.prediction_types.make_multiclass(label_names=_prediction_label_names)
 workflow = rw.workflows.GridFeatureExtractorClassifier()
 score_types = [
-    rw.score_types.ROCAUC(name="auc"),
-    rw.score_types.BrierScore(name="brier_score")
+    rw.score_types.ROCAUC(name="auc", precision=3),
+    rw.score_types.BrierScore(name="brier_score", precision=3),
+    rw.score_types.BrierSkillScore(name="brier_skill_score", precision=3),
+    rw.score_types.BrierScoreReliability(name="brier_score_reliability", precision=3),
+    rw.score_types.BrierScoreResolution(name="brier_score_resolution", precision=3),
 ]
 
 
