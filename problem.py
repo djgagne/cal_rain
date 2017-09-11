@@ -50,7 +50,7 @@ def _read_data(path, f_prefix):
     return X_ds, y_array
 
 
-def get_train_data(path='./data'):
+def get_train_data(path='./'):
     return _read_data(path, 'train')
 
 
